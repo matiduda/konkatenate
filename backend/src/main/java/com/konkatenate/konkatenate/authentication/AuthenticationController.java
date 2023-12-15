@@ -2,6 +2,7 @@ package com.konkatenate.konkatenate.authentication;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,5 +24,11 @@ public class AuthenticationController {
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(service.authenticate(request));
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<AuthenticationResponse> test() {
+        AuthenticationResponse response = new AuthenticationResponse("Invalid");
+        return ResponseEntity.ok(response);
     }
 }
