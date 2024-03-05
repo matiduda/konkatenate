@@ -1,3 +1,4 @@
+import { Container } from "@radix-ui/themes";
 import { useEffect, useState } from "react"
 
 export default function HomePage() {
@@ -14,11 +15,11 @@ export default function HomePage() {
     }, []);
 
     return (
-        <>
+        <Container>
             <h1>
                 Homepage
             </h1>
             <p>{response}</p>
-        </>
+        </Container>
     )
 }
