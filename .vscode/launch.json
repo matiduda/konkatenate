@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-KonkatenateApplication<konkatenate>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.konkatenate.konkatenate.KonkatenateApplication",
+            "projectName": "konkatenate",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

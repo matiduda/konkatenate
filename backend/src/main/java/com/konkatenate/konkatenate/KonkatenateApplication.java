@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin
 public class KonkatenateApplication {
 
+	public final static String GAME_DATA_LOCATION = "/home/tanczmy/konkatenate/storage/";
+
 	public static void main(String[] args) {
 		SpringApplication.run(KonkatenateApplication.class, args);
 	}
