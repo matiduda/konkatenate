@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        KonkatenateUser user = repository.findByUsername(username); // TODO: Add UsernameNotFoundException
+        KonkatenateUser user = repository.findByUsername(username);
         return new User(user.getUsername(), user.getPassword(), this.mapRolesToAuthorities(user.getRoles()));
     }
 

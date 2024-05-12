@@ -8,6 +8,7 @@ import com.konkatenate.konkatenate.KonkatenateUserRole.KonkatenateUserRole;
 import com.konkatenate.konkatenate.KonkatenateUserRole.KonkatenateUserRoleRepository;
 import com.konkatenate.konkatenate.Login.LoginDto;
 import com.konkatenate.konkatenate.Registration.RegisterDto;
+import com.konkatenate.konkatenate.Registration.RegistrationResponseDto;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -49,19 +51,16 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) {
+    @ResponseBody
+    public ResponseEntity<RegistrationResponseDto> register(@RequestBody RegisterDto registerDto) {
         if (konkatenateUserRepository.existsByUsername(registerDto.getUsername())) {
-            return new ResponseEntity<>("Username is taken", HttpStatus.BAD_REQUEST);
-        }
-
-        if (konkatenateUserRepository.existsByEmail(registerDto.getEmail())) {
-            return new ResponseEntity<>("Account with this email already exists", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new RegistrationResponseDto("User with this username already exists"),
+                    HttpStatus.BAD_REQUEST);
         }
 
         KonkatenateUser user = new KonkatenateUser();
 
         user.setUsername(registerDto.getUsername());
-        user.setEmail(registerDto.getEmail());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
 
         List<KonkatenateUserRole> roles = konkatenateUserRoleRepository.findByName("USER");
@@ -70,13 +69,14 @@ public class AuthController {
 
         konkatenateUserRepository.save(user);
 
-        return new ResponseEntity<>("Successfully registered", HttpStatus.OK);
+        return new ResponseEntity<>(new RegistrationResponseDto("Successfully registered"), HttpStatus.OK);
     }
 
     @PostMapping("login")
+    @ResponseBody
     public ResponseEntity<AuthResponseDTO> postMethodName(@RequestBody LoginDto loginDto) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(), loginDto.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
