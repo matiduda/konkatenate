@@ -1,10 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
 import '@radix-ui/themes/styles.css';
 import { Theme } from '@radix-ui/themes';
 import { BrowserRouter } from 'react-router-dom';
 import { StompProvider } from './useStomp/Provider.tsx';
+import App from './App.tsx';
 
 const SERVER_STOMP_URL = "ws://localhost:8080/ws";
 

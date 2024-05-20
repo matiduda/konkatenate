@@ -1,25 +1,56 @@
+
+
 import * as Form from '@radix-ui/react-form';
 import { Button, Container } from '@radix-ui/themes';
-import { FormEvent, useEffect, useRef, useState } from 'react';
-import { API_URL, MAX_USERNAME_LENGTH } from '../App';
-import { Toast, ToastAction, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from '@radix-ui/react-toast';
-import { useNavigate } from 'react-router-dom';
+import { FormEvent, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { UsernameFormElement } from '../utils/types';
+import { API_URL, MAX_USERNAME_LENGTH, TOKEN_COOKIE_ID } from '../App';
+import { ToastProvider, Toast, ToastTitle, ToastDescription, ToastViewport } from '@radix-ui/react-toast';
+import Cookies from 'universal-cookie';
+import { jwtDecode } from 'jwt-decode';
+import { isUserAuthenticated } from '../utils/isUserAuthenticated';
 
-export default function RegisterPage() {
+const WAIT_TIME_BEFORE_REDIRECT = 3000;
+
+export default function LoginPage() {
+
+    const navigate = useNavigate();
 
     const [isWaitingForRegisterResponse, setIsWaitingForRegisterResponse] = useState<boolean>(false);
+
+    const cookies = new Cookies();
 
     // Popup
     const [open, setOpen] = useState(false);
     const eventDateRef = useRef("Some event msg");
     const timerRef = useRef(0);
 
-    const [displayLoginButton, setDisplayLoginButton] = useState(false);
+    const openNotification = (message: string = "Error") => {
+        setOpen(false);
+        clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => {
+            eventDateRef.current = message;
+            setOpen(true);
+        }, 100);
+    };
 
-    useEffect(() => {
-        return () => clearTimeout(timerRef.current);
-    }, []);
+    const saveBearerTokenInCookies = (token: string, tokenType: string) => {
+        const wholeToken = `${tokenType}${token}`;
+
+        const decodedToken = jwtDecode(wholeToken);
+
+        if (!decodedToken.exp) {
+            throw new Error("Could not decode JWT token");
+            return;
+        }
+
+        cookies.set(TOKEN_COOKIE_ID, decodedToken, {
+            expires: new Date(decodedToken.exp * 1000)
+        });
+
+        console.log(cookies.get(TOKEN_COOKIE_ID));
+    };
 
     const handleSubmit = (event: FormEvent<UsernameFormElement>) => {
         event.preventDefault();
@@ -29,7 +60,7 @@ export default function RegisterPage() {
         const password = event.currentTarget.elements.password.value;
 
         const createUser = async () => {
-            const registerEndpoint = API_URL + "/auth/register";
+            const loginEndpoint = API_URL + "/auth/login";
 
             const requestBody = {
                 username: username,
@@ -42,44 +73,44 @@ export default function RegisterPage() {
                 "Content-Type": "application/json"
             });
 
-            const result = await fetch(registerEndpoint, {
+            const result = await fetch(loginEndpoint, {
                 method: "POST",
                 body: JSON.stringify(requestBody),
                 headers: headers
             });
 
-            const object = await result.json();
+            if (!result.ok) {
+                return "An unexpected error happened. Please try again";
+            }
 
-            setDisplayLoginButton(result.ok);
+            const response = await result.json();
 
-            console.log(object);
+            console.log(response);
 
-            return object.message;
+            saveBearerTokenInCookies(response.accessToken, response.tokenType);
+            return response.message;
         };
 
         createUser().then((message) => {
             setIsWaitingForRegisterResponse(false)
-            openNotification(message);
+
+            if (message?.length) {
+                openNotification(message);
+            }
+
+            if (isUserAuthenticated()) {
+                // Redirect to games page
+                setTimeout(() => navigate("/games"), WAIT_TIME_BEFORE_REDIRECT);
+            }
         });
-    }
-
-    const openNotification = (message: string = "Error") => {
-        setOpen(false);
-        clearTimeout(timerRef.current);
-        timerRef.current = setTimeout(() => {
-            eventDateRef.current = message;
-            setOpen(true);
-        }, 100);
-    }
-
-    const repeatPasswordMatcher = (value: string, formData: FormData) => value !== formData.get("password");
-
-    const navigate = useNavigate();
+    };
 
     return (
         <Container>
-            <h1>Create an account</h1>
-            <Form.Root className="FormRoot" onSubmit={handleSubmit} style={{ width: "400px" }}>
+            <h1>Sign in</h1>
+            <p>Don't have an account? You can <Link to="/register">create one here</Link></p>
+            <Form.Root className="FormRoot" onSubmit={handleSubmit}>
+
                 <Form.Field className="FormField" name="username">
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: "10px" }}>
                         <Form.Label className="FormLabel">
@@ -99,7 +130,7 @@ export default function RegisterPage() {
                         </Form.Message>
                     </div>
                     <Form.Control asChild>
-                        <input className="Input" maxLength={MAX_USERNAME_LENGTH} pattern={`[A-Za-z0-9_]{0,${MAX_USERNAME_LENGTH}}`} required />
+                        <input className="Input" maxLength={20} pattern={`[A-Za-z0-9_]{0,${MAX_USERNAME_LENGTH}}`} required />
                     </Form.Control>
                 </Form.Field>
                 <Form.Field className="FormField" name="password">
@@ -115,44 +146,21 @@ export default function RegisterPage() {
                         <input className="Input" type="password" required />
                     </Form.Control>
                 </Form.Field>
-                <Form.Field className="FormField" name="password-repeat">
-                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                        <Form.Label className="FormLabel">
-                            Repeat password
-                        </Form.Label>
-                        <Form.Message className="FormMessage" match={repeatPasswordMatcher}>
-                            Password do not match
-                        </Form.Message>
-                        <Form.Message className="FormMessage" match="valueMissing">
-                            Please repeat your password
-                        </Form.Message>
-                    </div>
-                    <Form.Control asChild>
-                        <input className="Input" type="password" required />
-                    </Form.Control>
-                </Form.Field>
                 <Form.Submit asChild>
                     <Button className="Button" style={{ marginTop: 10 }} loading={isWaitingForRegisterResponse}>
                         Submit
                     </Button>
                 </Form.Submit>
             </Form.Root>
-
             <ToastProvider>
                 <Toast className="ToastRoot" open={open} onOpenChange={setOpen}>
                     <ToastTitle className="ToastTitle">Register</ToastTitle>
                     <ToastDescription>
                         {eventDateRef.current}
                     </ToastDescription>
-
-                    <ToastAction asChild className="ToastAction" altText="Goto schedule to undo">
-                        {displayLoginButton && <button className="ToastActionButton small green" onClick={() => navigate("/login")}>
-                            Login
-                        </button>}
-                    </ToastAction>
                 </Toast>
                 <ToastViewport className="ToastViewport" />
             </ToastProvider>
-        </Container >
-    )
+        </Container>
+    );
 }
