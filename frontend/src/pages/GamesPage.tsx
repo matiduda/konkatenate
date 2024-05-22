@@ -1,38 +1,105 @@
-import { Box, Card, Container, Inset, Strong, Text } from "@radix-ui/themes";
+import { Box, Button, Card, Container, Flex, Inset, Skeleton, Strong, Text } from "@radix-ui/themes";
+import { useEffect, useState } from "react";
+import { API_URL, STATIC_URL } from "../App";
+import { render } from "react-dom";
+import { Description, Title } from "@radix-ui/react-toast";
+import { useNavigate } from "react-router-dom";
 
+type GameInfo = {
+    title: string,
+    id: string,
+    description: string,
+}
 
-
-
-// https://uploadcare.com/blog/how-to-upload-file-in-react/
-
-
-
+const MOCK_INFO: GameInfo = {
+    title: "",
+    id: "",
+    description: ""
+}
 
 export default function GamesPage() {
+
+    const navigate = useNavigate();
+
+    const [loading, setLoading] = useState<boolean>(true);
+
+    const [gameList, setGameList] = useState<GameInfo[]>(new Array(5).map((el, i) => ({
+        title: "Title",
+        id: i.toString(),
+        description: "Description"
+    }) as GameInfo));
+
+    const getImageCover = (gameId: string) => `${STATIC_URL}games/${gameId}/cover.jpg`;
+
+    const getGames = async (): Promise<GameInfo[]> => {
+        const gamesEndpoint = API_URL + "/games";
+
+        const headers = new Headers({
+            "Content-Type": "application/json"
+        });
+
+        const result = await fetch(gamesEndpoint, {
+            method: "GET",
+            headers: headers
+        });
+
+        const json = await result.json();
+
+        return json.games;
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        getGames().then(gameList => {
+            console.log(gameList);
+            setGameList(gameList);
+            setLoading(false);
+        })
+    }, []);
+
+    const renderGameCard = (info: GameInfo) => {
+        return (
+            <Box key={info.id} maxWidth="300px" minWidth={"300px"}>
+                <Skeleton loading={loading}>
+                    <Card size="2">
+                        <Inset clip="padding-box" side="top" pb="current">
+                            <img
+                                src={getImageCover(info.id)}
+                                alt="Bold typography"
+                                style={{
+                                    display: 'block',
+                                    objectFit: 'cover',
+                                    width: '100%',
+                                    height: 140,
+                                    backgroundColor: 'var(--gray-5)',
+                                }}
+                            />
+                        </Inset>
+                        <Text as="p" size="3">
+                            <Strong>{info.title}</Strong>
+                        </Text>
+                        <Text as="p" size="3" my="3">
+                            {info.description}
+                        </Text>
+                        <Flex justify="end">
+                            <Button onClick={() => navigate('/play', { state: { id: info.id } })}>Play</Button>
+                        </Flex>
+                    </Card>
+                </Skeleton>
+            </Box>
+        )
+    }
+
     return (
         <Container>
             <h1>Browse games</h1>
-            <Box maxWidth="240px">
-                <Card size="2">
-                    <Inset clip="padding-box" side="top" pb="current">
-                        <img
-                            src="https://images.unsplash.com/photo-1617050318658-a9a3175e34cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
-                            alt="Bold typography"
-                            style={{
-                                display: 'block',
-                                objectFit: 'cover',
-                                width: '100%',
-                                height: 140,
-                                backgroundColor: 'var(--gray-5)',
-                            }}
-                        />
-                    </Inset>
-                    <Text as="p" size="3">
-                        <Strong>Typography</Strong> is the art and technique of arranging type to
-                        make written language legible, readable and appealing when displayed.
-                    </Text>
-                </Card>
-            </Box>
+            <Flex>
+                <Box width="250px"></Box>
+                <Flex wrap="wrap" justify="center" gap="6">
+                    {gameList.map(game => renderGameCard(game))}
+                </Flex>
+                <Box width="250px"></Box>
+            </Flex>
         </Container>
     )
 }

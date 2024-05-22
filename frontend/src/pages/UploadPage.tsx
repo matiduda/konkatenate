@@ -9,6 +9,8 @@ import * as Form from '@radix-ui/react-form';
 
 const WAIT_TIME_BEFORE_REDIRECT = 3000;
 
+// https://uploadcare.com/blog/how-to-upload-file-in-react/
+
 export default function UploadPage() {
     const [isWaitingForRegisterResponse, setIsWaitingForRegisterResponse] = useState<boolean>(false);
 

@@ -9,8 +9,10 @@ import RegisterPage from './pages/RegisterPage';
 import "./styles.css";
 import GamesPage from './pages/GamesPage';
 import UploadPage from './pages/UploadPage';
+import PlayPage from './pages/PlayPage';
 
 export const API_URL = "http://localhost:8080/api";
+export const STATIC_URL = "http://localhost:8080/";
 export const MAX_USERNAME_LENGTH = 20;
 
 export const TOKEN_COOKIE_ID = "kkt_auth";
@@ -26,6 +28,7 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/games" element={<GamesPage />} />
         <Route path="/upload" element={<UploadPage />} />
+        <Route path="/play" element={<PlayPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>

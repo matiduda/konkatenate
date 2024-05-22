@@ -74,7 +74,7 @@ public class AuthController {
 
     @PostMapping("login")
     @ResponseBody
-    public ResponseEntity<AuthResponseDTO> postMethodName(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDto loginDto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
 
@@ -82,6 +82,6 @@ public class AuthController {
 
         String token = tokenGenerator.generateToken(authentication);
 
-        return new ResponseEntity<AuthResponseDTO>(new AuthResponseDTO(token), HttpStatus.OK);
+        return new ResponseEntity<AuthResponseDTO>(new AuthResponseDTO(token, "Successfully logged in"), HttpStatus.OK);
     }
 }

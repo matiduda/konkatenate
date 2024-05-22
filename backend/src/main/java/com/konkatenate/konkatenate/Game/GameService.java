@@ -3,8 +3,15 @@ package com.konkatenate.konkatenate.Game;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,11 +32,12 @@ public class GameService {
     @Value("${gamestorage.dir}")
     private String gameStorageLocation;
 
-    public String uploadGameToFileSystem(MultipartFile file, String title) throws IllegalStateException, IOException {
+    public String createGame(MultipartFile file, String title, String description, MultipartFile coverImage)
+            throws IllegalStateException, IOException {
         String gameStorageId = getStorageId(title);
         String gameStoragePath = getGameStoragePath(gameStorageId);
 
-        Game game = Game.builder().title(title).storageId(gameStorageId).build();
+        Game game = Game.builder().title(title).description(description).storageId(gameStorageId).build();
 
         // From
         // https://stackoverflow.com/questions/39851296/how-to-unzip-an-uploaded-zip-file-using-spring-in-java
@@ -47,6 +55,10 @@ public class GameService {
         } finally {
             zip.delete();
         }
+
+        Path coverImageStoragePath = Path.of(gameStoragePath + "/cover.jpg");
+        Files.copy(coverImage.getInputStream(), coverImageStoragePath, StandardCopyOption.REPLACE_EXISTING);
+
         // TODO: Check if zip contains index.html
 
         repository.save(game);
@@ -61,5 +73,37 @@ public class GameService {
 
     private String getGameStoragePath(String storageId) {
         return gameStorageLocation + "/" + storageId.toString();
+    }
+
+    public List<Game> getAllGames() {
+        return repository.findAll();
+    }
+
+    public List<Game> getGames(String title) {
+        return repository.findByTitle(title);
+    }
+
+    public void deleteAllGames() {
+        List<Game> allGames = repository.findAll();
+
+        allGames.forEach(game -> {
+            repository.delete(game);
+
+            if (game.getStorageId() == null) {
+                return;
+            }
+
+            String storagePath = getGameStoragePath(game.getStorageId());
+
+            if (!Files.exists(Paths.get(storagePath))) {
+                return;
+            }
+
+            try {
+                FileUtils.deleteDirectory(new File(storagePath));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

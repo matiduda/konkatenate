@@ -73,14 +73,20 @@ export default function LoginPage() {
                 "Content-Type": "application/json"
             });
 
-            const result = await fetch(loginEndpoint, {
-                method: "POST",
-                body: JSON.stringify(requestBody),
-                headers: headers
-            });
+            let result: Response;
+
+            try {
+                result = await fetch(loginEndpoint, {
+                    method: "POST",
+                    body: JSON.stringify(requestBody),
+                    headers: headers
+                });
+            } catch (e) {
+                return "Failed to connect to server";
+            }
 
             if (!result.ok) {
-                return "An unexpected error happened. Please try again";
+                return "An unexpected error happened";
             }
 
             const response = await result.json();
