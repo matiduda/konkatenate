@@ -1,5 +1,7 @@
 package com.konkatenate.konkatenate.Chat;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,4 +17,6 @@ public class ChatMessage {
     private String content;
     private String sender;
     private MessageType type;
+    private Long timestamp;
+
 }

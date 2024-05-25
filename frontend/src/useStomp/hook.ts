@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { StompContext } from "./Provider";
 
-interface ObjectType<T = string> {
+export interface ObjectType<T = string> {
     [key: string]: T;
 }
 

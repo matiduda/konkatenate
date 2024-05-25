@@ -33,4 +33,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     private Collection<GrantedAuthority> mapRolesToAuthorities(List<KonkatenateUserRole> roles) {
         return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
     }
+
+    public List<KonkatenateUser> getAllUsersByUsername(String username) {
+        return repository.findAllByUsername(username);
+    }
+
+    public List<KonkatenateUser> getAllUsers() {
+        return repository.findAll();
+    }
 }

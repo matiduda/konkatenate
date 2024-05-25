@@ -25,6 +25,8 @@ public class ChatController {
             throws Exception {
         var sessionAttributes = headerAccessor.getSessionAttributes();
 
+        chatMessage.setTimestamp(headerAccessor.getTimestamp());
+
         if (sessionAttributes == null) {
             throw new Exception("Could not head session attributes");
         }

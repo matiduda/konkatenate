@@ -3,6 +3,7 @@ package com.konkatenate.konkatenate.KonkatenateUser;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.konkatenate.konkatenate.Game.Game;
 import com.konkatenate.konkatenate.KonkatenateUserRole.KonkatenateUserRole;
 
 import jakarta.persistence.CascadeType;
@@ -14,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,4 +45,6 @@ public class KonkatenateUser {
                     @JoinColumn(name = "role_id", referencedColumnName = "id") })
     private List<KonkatenateUserRole> roles = new ArrayList<>();
 
+    @OneToMany(mappedBy = "konkatenate_users")
+    public List<Game> uploadedGames = new ArrayList<>();
 }

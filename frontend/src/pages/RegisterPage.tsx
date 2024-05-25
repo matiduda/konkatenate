@@ -36,7 +36,6 @@ export default function RegisterPage() {
                 password: password
             };
 
-            console.log(requestBody);
 
             const headers = new Headers({
                 "Content-Type": "application/json"
@@ -51,8 +50,6 @@ export default function RegisterPage() {
             const object = await result.json();
 
             setDisplayLoginButton(result.ok);
-
-            console.log(object);
 
             return object.message;
         };

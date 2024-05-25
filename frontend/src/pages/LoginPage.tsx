@@ -48,8 +48,6 @@ export default function LoginPage() {
         cookies.set(TOKEN_COOKIE_ID, decodedToken, {
             expires: new Date(decodedToken.exp * 1000)
         });
-
-        console.log(cookies.get(TOKEN_COOKIE_ID));
     };
 
     const handleSubmit = (event: FormEvent<UsernameFormElement>) => {
@@ -66,8 +64,6 @@ export default function LoginPage() {
                 username: username,
                 password: password
             };
-
-            console.log(requestBody);
 
             const headers = new Headers({
                 "Content-Type": "application/json"
@@ -91,8 +87,6 @@ export default function LoginPage() {
 
             const response = await result.json();
 
-            console.log(response);
-
             saveBearerTokenInCookies(response.accessToken, response.tokenType);
             return response.message;
         };
@@ -106,14 +100,17 @@ export default function LoginPage() {
 
             if (isUserAuthenticated()) {
                 // Redirect to games page
-                setTimeout(() => navigate("/games"), WAIT_TIME_BEFORE_REDIRECT);
+                setTimeout(() => {
+                    navigate("/games")
+                    navigate(0);
+                }, WAIT_TIME_BEFORE_REDIRECT);
             }
         });
     };
 
     return (
         <Container>
-            <h1>Sign in</h1>
+            <h1>Login</h1>
             <p>Don't have an account? You can <Link to="/register">create one here</Link></p>
             <Form.Root className="FormRoot" onSubmit={handleSubmit}>
 
@@ -160,7 +157,7 @@ export default function LoginPage() {
             </Form.Root>
             <ToastProvider>
                 <Toast className="ToastRoot" open={open} onOpenChange={setOpen}>
-                    <ToastTitle className="ToastTitle">Register</ToastTitle>
+                    <ToastTitle className="ToastTitle">Login</ToastTitle>
                     <ToastDescription>
                         {eventDateRef.current}
                     </ToastDescription>

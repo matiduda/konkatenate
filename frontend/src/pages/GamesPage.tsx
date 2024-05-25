@@ -5,16 +5,29 @@ import { render } from "react-dom";
 import { Description, Title } from "@radix-ui/react-toast";
 import { useNavigate } from "react-router-dom";
 
-type GameInfo = {
+export type GameInfo = {
     title: string,
     id: string,
     description: string,
 }
 
-const MOCK_INFO: GameInfo = {
-    title: "",
-    id: "",
-    description: ""
+export const getImageCover = (gameId: string) => `${STATIC_URL}games/${gameId}/cover.jpg`;
+
+export const getGames = async (): Promise<GameInfo[]> => {
+    const gamesEndpoint = API_URL + "/games";
+
+    const headers = new Headers({
+        "Content-Type": "application/json"
+    });
+
+    const result = await fetch(gamesEndpoint, {
+        method: "GET",
+        headers: headers
+    });
+
+    const json = await result.json();
+
+    return json.games;
 }
 
 export default function GamesPage() {
@@ -29,29 +42,8 @@ export default function GamesPage() {
         description: "Description"
     }) as GameInfo));
 
-    const getImageCover = (gameId: string) => `${STATIC_URL}games/${gameId}/cover.jpg`;
-
-    const getGames = async (): Promise<GameInfo[]> => {
-        const gamesEndpoint = API_URL + "/games";
-
-        const headers = new Headers({
-            "Content-Type": "application/json"
-        });
-
-        const result = await fetch(gamesEndpoint, {
-            method: "GET",
-            headers: headers
-        });
-
-        const json = await result.json();
-
-        return json.games;
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         getGames().then(gameList => {
-            console.log(gameList);
             setGameList(gameList);
             setLoading(false);
         })
@@ -82,7 +74,7 @@ export default function GamesPage() {
                             {info.description}
                         </Text>
                         <Flex justify="end">
-                            <Button onClick={() => navigate('/play', { state: { id: info.id } })}>Play</Button>
+                            <Button onClick={() => navigate('/play', { state: { id: info.id, title: info.title } })}>Play</Button>
                         </Flex>
                     </Card>
                 </Skeleton>

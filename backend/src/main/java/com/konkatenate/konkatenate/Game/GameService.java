@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -17,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.konkatenate.konkatenate.KonkatenateApplication;
 
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -49,6 +46,12 @@ public class GameService {
         try {
             ZipFile zipFile = new ZipFile(zip);
             zipFile.extractAll(gameStoragePath);
+
+            if (!Files.exists(Paths.get(gameStoragePath + "/index.html"))) {
+                zipFile.close();
+                throw new Error("Game zip does not contanin index.html");
+            }
+
             zipFile.close();
         } catch (ZipException e) {
             e.printStackTrace();
@@ -67,7 +70,7 @@ public class GameService {
     }
 
     // From "My Game " produces "my-game"
-    private String getStorageId(String title) {
+    public String getStorageId(String title) {
         return title.trim().replaceAll("\\s+", "-").toLowerCase();
     }
 
@@ -83,6 +86,20 @@ public class GameService {
         return repository.findByTitle(title);
     }
 
+    private void deleteGameFromStorage(Game game) {
+        String storagePath = getGameStoragePath(game.getStorageId());
+
+        if (!Files.exists(Paths.get(storagePath))) {
+            return;
+        }
+
+        try {
+            FileUtils.deleteDirectory(new File(storagePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void deleteAllGames() {
         List<Game> allGames = repository.findAll();
 
@@ -93,17 +110,7 @@ public class GameService {
                 return;
             }
 
-            String storagePath = getGameStoragePath(game.getStorageId());
-
-            if (!Files.exists(Paths.get(storagePath))) {
-                return;
-            }
-
-            try {
-                FileUtils.deleteDirectory(new File(storagePath));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            deleteGameFromStorage(game);
         });
     }
 }

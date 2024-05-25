@@ -61,10 +61,22 @@ public class GameController {
         // - .zip with game contents (as working HTML page)
         // - cover picture
         // - title, description, author, category, etc.
-        gameService.createGame(file, title, description, cover);
+
+        List<Game> existingGames = gameService.getGames(title);
+
+        if (!existingGames.isEmpty()) {
+            MessageResponseDTO responseDto = new MessageResponseDTO("Game with a given title already exists");
+            return new ResponseEntity<MessageResponseDTO>(responseDto, HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            gameService.createGame(file, title, description, cover);
+        } catch (Error e) {
+            MessageResponseDTO responseDto = new MessageResponseDTO(e.getMessage());
+            return new ResponseEntity<MessageResponseDTO>(responseDto, HttpStatus.BAD_REQUEST);
+        }
 
         MessageResponseDTO responseDto = new MessageResponseDTO("Successfully uploaded game");
-
         return new ResponseEntity<MessageResponseDTO>(responseDto, HttpStatus.OK);
     }
 

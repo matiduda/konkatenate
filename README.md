@@ -7,24 +7,6 @@ HTML5 game repository with live chat, inspired by [kongregate.com](https://www.k
 
 # TODO
 
-- [ ] Registration and login system
-    - [ ] Backend
-    - [ ] Frontend
-- [ ] User profile editing system
-    - [ ] Backend
-    - [ ] Frontend
-- [ ] Game addition system
-    - [ ] Backend
-    - [ ] Frontend
-- [ ] Game display system
-    - [ ] Backend
-    - [ ] Frontend
-- [ ] Game serving system
-    - [ ] Backend
-    - [ ] Frontend
-- [ ] Chat system
-    - [ ] Backend
-    - [ ] Frontend
-- [ ] Admin / moderation system (inspecting game stats, removing games, banning users on chat, etc.)
-    - [ ] Backend
-    - [ ] Frontend
+- [ ] niech admin też coś może robić
+- [ ] stronicowanie
+- [ ] internacjonalizacja (dwa języki, np.: polski i angielski)
