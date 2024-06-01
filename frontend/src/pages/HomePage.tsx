@@ -5,7 +5,10 @@ import VideoShowcase from "../components/VideoShowcase";
 export default function HomePage() {
     return (
         <>
-            <Container>
+            <Container style={{
+                marginTop: "100px",
+                marginBottom: "100px",
+            }}>
                 <Flex width="100%" justify="center">
                     <h3>
                         Check out what's currently played

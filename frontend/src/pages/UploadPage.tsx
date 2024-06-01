@@ -5,6 +5,7 @@ import { FormEvent, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Form from '@radix-ui/react-form';
 import { UploadFormElement } from "../utils/types";
+import { getUsername } from "../utils/getUsername";
 
 const WAIT_TIME_BEFORE_REDIRECT = 3000;
 
@@ -57,6 +58,7 @@ export default function UploadPage() {
             formData.append("description", description);
             formData.append("game", game);
             formData.append("cover", cover);
+            formData.append("uploader", getUsername());
 
             const result = await fetch(uploadEndpoint, {
                 method: "POST",
@@ -83,7 +85,7 @@ export default function UploadPage() {
     };
 
     return (
-        <Container>
+        <Container minHeight="70vh">
             <h1>Add game</h1>
             <Form.Root className="FormRoot" onSubmit={handleSubmit}>
                 <Form.Field className="FormField" name="title">

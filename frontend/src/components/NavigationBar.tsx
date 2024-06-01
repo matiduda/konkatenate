@@ -1,11 +1,12 @@
-import { Container, Flex, Box, Button, Callout } from "@radix-ui/themes";
+import { Container, Flex, Box, Button, Callout, Text } from "@radix-ui/themes";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/konkatenate.svg";
-import { CSSProperties, useEffect, useReducer, useState } from "react";
+import { CSSProperties, useEffect, useState } from "react";
 import { isUserAuthenticated } from "../utils/isUserAuthenticated";
 import Cookies from "universal-cookie"
 import { API_URL, TOKEN_COOKIE_ID } from "../App";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
+import { getUsername } from "../utils/getUsername";
 
 
 export default function NavigationBar() {
@@ -67,7 +68,9 @@ export default function NavigationBar() {
             {
                 isServerResponding
                     ? (<></>)
-                    : (<Callout.Root>
+                    : (<Callout.Root style={{
+                        marginBottom: 30
+                    }}>
                         <Callout.Icon>
                             <InfoCircledIcon />
                         </Callout.Icon>
@@ -80,25 +83,39 @@ export default function NavigationBar() {
 
 
 
-            <Flex direction="row" justify="between">
+            <Flex direction="row" justify="between" align="center">
                 <Box>
                     <img src={logo} style={logoStyle} onClick={() => navigate("/")} />
                 </Box>
+
+                {
+                    isUserAuthenticated() ? (
+                        <Box>
+                            <Text>Hi, <strong>{getUsername()}</strong></Text>
+                        </Box>
+                    ) : (<></>)
+                }
+
                 <Box>
-                    <Flex justify="end" style={{
+                    <Flex justify="end" align="center" style={{
                         columnGap: 10
                     }}>
-                        <Button onClick={() => navigate("/games")}>Games</Button>
                         {
                             isUserAuthenticated()
-                                ? (<>
-                                    <Button onClick={() => navigate("/users")}>Users</Button>
-                                    <Button onClick={() => navigate("/upload")}>Upload</Button>
-                                    <Button onClick={handleLogout}>Logout</Button>
-                                </>
-
+                                ? (
+                                    <>
+                                        <Button onClick={() => navigate("/users")}>Users</Button>
+                                        <Button onClick={() => navigate("/games")}>Games</Button>
+                                        <Button onClick={() => navigate("/upload")}>Upload</Button>
+                                        <Button onClick={handleLogout}>Logout</Button>
+                                    </>
                                 )
-                                : (<Button onClick={() => navigate("/login")}>Login</Button>)
+                                : (
+                                    <>
+                                        <Button onClick={() => navigate("/games")}>Games</Button>
+                                        <Button onClick={() => navigate("/login")}>Login</Button>
+                                    </>
+                                )
                         }
 
                     </Flex>

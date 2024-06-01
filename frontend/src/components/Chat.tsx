@@ -23,7 +23,7 @@ type Message = {
 }
 
 
-export default function Chat() {
+export default function Chat({ gameID }: { gameID: string }) {
     const { disconnect, subscribe, unsubscribe, subscriptions, send, isConnected } = useStomp();
 
     const [messages, setMessages] = useState<Message[]>([]);
@@ -56,8 +56,8 @@ export default function Chat() {
     }
 
     const connect = () => {
-        subscribe("/topic/public", onMessageReceived);
-        send("/app/chat.addUser", { sender: getUsername(), type: "JOIN" }, { sender: getUsername(), type: "JOIN" });
+        subscribe("/topic/public/" + gameID, onMessageReceived);
+        send("/app/chat.addUser/" + gameID, { sender: getUsername(), type: "JOIN" }, { sender: getUsername(), type: "JOIN" });
     }
 
     const sendMessage = (event: FormEvent<ChatFormElement>) => {
@@ -71,7 +71,7 @@ export default function Chat() {
         };
 
 
-        send("/app/chat.sendMessage", message as unknown as ObjectType<string>, { sender: getUsername(), type: "JOIN" });
+        send("/app/chat.sendMessage/" + gameID, message as unknown as ObjectType<string>, { sender: getUsername(), type: "JOIN" });
         event.currentTarget.elements.message.value = "";
     }
 

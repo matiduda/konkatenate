@@ -7,8 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -16,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.konkatenate.konkatenate.KonkatenateUser.KonkatenateUser;
+import com.konkatenate.konkatenate.Security.CustomUserDetailsService;
 
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -26,15 +33,20 @@ public class GameService {
     @Autowired
     GameRepository repository;
 
+    @Autowired
+    CustomUserDetailsService userService;
+
     @Value("${gamestorage.dir}")
     private String gameStorageLocation;
 
-    public String createGame(MultipartFile file, String title, String description, MultipartFile coverImage)
+    public String createGame(MultipartFile file, String title, String description, MultipartFile coverImage,
+            KonkatenateUser uploader)
             throws IllegalStateException, IOException {
         String gameStorageId = getStorageId(title);
         String gameStoragePath = getGameStoragePath(gameStorageId);
 
-        Game game = Game.builder().title(title).description(description).storageId(gameStorageId).build();
+        Game game = Game.builder().title(title).description(description).storageId(gameStorageId).uploader(uploader)
+                .build();
 
         // From
         // https://stackoverflow.com/questions/39851296/how-to-unzip-an-uploaded-zip-file-using-spring-in-java
@@ -62,8 +74,6 @@ public class GameService {
         Path coverImageStoragePath = Path.of(gameStoragePath + "/cover.jpg");
         Files.copy(coverImage.getInputStream(), coverImageStoragePath, StandardCopyOption.REPLACE_EXISTING);
 
-        // TODO: Check if zip contains index.html
-
         repository.save(game);
 
         return null;
@@ -86,7 +96,7 @@ public class GameService {
         return repository.findByTitle(title);
     }
 
-    private void deleteGameFromStorage(Game game) {
+    public void deleteGameFromStorage(Game game) {
         String storagePath = getGameStoragePath(game.getStorageId());
 
         if (!Files.exists(Paths.get(storagePath))) {
@@ -112,5 +122,32 @@ public class GameService {
 
             deleteGameFromStorage(game);
         });
+    }
+
+    public Game getGameById(String gameID) {
+        return repository.findByStorageId(gameID);
+    }
+
+    public void deleteGame(Game game) {
+        repository.delete(game);
+        deleteGameFromStorage(game);
+    }
+
+    public List<GameInfo> getGamesUploadedByUser(KonkatenateUser user) {
+        List<Game> userGames = new ArrayList<Game>();
+
+        List<Game> allGames = repository.findAll();
+
+        allGames.forEach(game -> {
+            if (game.getUploader().getUsername().equals(user.getUsername())) {
+                userGames.add(game);
+            }
+        });
+
+        return userGames
+                .stream()
+                .map(game -> new GameInfo(game.getStorageId(), game.getTitle(), game.getDescription(),
+                        game.getUploader().getUsername()))
+                .collect(Collectors.toList());
     }
 }

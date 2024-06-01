@@ -3,8 +3,13 @@ package com.konkatenate.konkatenate.Game;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.konkatenate.konkatenate.KonkatenateUser.KonkatenateUser;
+import com.konkatenate.konkatenate.KonkatenateUserRole.KonkatenateUserRoleRepository;
 import com.konkatenate.konkatenate.Login.LoginDto;
 import com.konkatenate.konkatenate.Security.AuthResponseDTO;
+import com.konkatenate.konkatenate.Security.CustomUserDetailsService;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,10 +31,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/games")
+@Slf4j
 public class GameController {
 
     @Autowired
     private GameService gameService;
+
+    @Autowired
+    private CustomUserDetailsService userService;
 
     @GetMapping()
     @ResponseBody
@@ -42,7 +51,8 @@ public class GameController {
 
         List<GameInfo> gameInfoList = games
                 .stream()
-                .map(game -> new GameInfo(game.getStorageId(), game.getTitle(), game.getDescription()))
+                .map(game -> new GameInfo(game.getStorageId(), game.getTitle(), game.getDescription(),
+                        game.getUploader().getUsername()))
                 .collect(Collectors.toList());
 
         GameResponseDTO gameResponseDto = new GameResponseDTO(gameInfoList);
@@ -55,6 +65,7 @@ public class GameController {
             @RequestParam("game") MultipartFile file,
             @RequestParam("cover") MultipartFile cover,
             @RequestParam("title") String title,
+            @RequestParam("uploader") String uploaderUsername,
             @RequestParam("description") String description)
             throws IllegalStateException, IOException {
         // Requires:
@@ -69,8 +80,19 @@ public class GameController {
             return new ResponseEntity<MessageResponseDTO>(responseDto, HttpStatus.BAD_REQUEST);
         }
 
+        KonkatenateUser uploader = userService.findByName(uploaderUsername);
+
+        if (uploader == null) {
+            MessageResponseDTO responseDto = new MessageResponseDTO("Uploader " + uploaderUsername + " does not exist");
+            return new ResponseEntity<MessageResponseDTO>(responseDto, HttpStatus.BAD_REQUEST);
+        }
+
+        var currentUserName = SecurityContextHolder.getContext().getAuthentication();
+
+        log.info(currentUserName.toString());
+
         try {
-            gameService.createGame(file, title, description, cover);
+            gameService.createGame(file, title, description, cover, uploader);
         } catch (Error e) {
             MessageResponseDTO responseDto = new MessageResponseDTO(e.getMessage());
             return new ResponseEntity<MessageResponseDTO>(responseDto, HttpStatus.BAD_REQUEST);
@@ -80,7 +102,44 @@ public class GameController {
         return new ResponseEntity<MessageResponseDTO>(responseDto, HttpStatus.OK);
     }
 
-    @DeleteMapping()
+    @PostMapping("/deleteSingle")
+    public ResponseEntity<MessageResponseDTO> deleteSingleGame(
+            @RequestParam("id") String gameID,
+            @RequestParam("uploader") String uploaderUsername) {
+
+        Game game = gameService.getGameById(gameID);
+
+        if (game == null) {
+            MessageResponseDTO responseDto = new MessageResponseDTO("Game with id " + gameID + " does not exist");
+            return new ResponseEntity<MessageResponseDTO>(responseDto, HttpStatus.BAD_REQUEST);
+        }
+
+        List<KonkatenateUser> currentUserList = userService.getAllUsersByUsername(uploaderUsername);
+        if (currentUserList.size() == 0) {
+            MessageResponseDTO responseDto = new MessageResponseDTO(
+                    "User with username " + uploaderUsername + " does not exist");
+            return new ResponseEntity<MessageResponseDTO>(responseDto, HttpStatus.BAD_REQUEST);
+        }
+
+        KonkatenateUser currentUser = currentUserList.get(0);
+
+        if (!userService.isAdmin(currentUser)) {
+            String gameUploaderUsername = game.getUploader().getUsername();
+            if (!gameUploaderUsername.equals(uploaderUsername)) {
+                MessageResponseDTO responseDto = new MessageResponseDTO(
+                        "Uploader of game " + gameID + ", " + gameUploaderUsername + ", does not match current user "
+                                + uploaderUsername);
+                return new ResponseEntity<MessageResponseDTO>(responseDto, HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        gameService.deleteGame(game);
+
+        MessageResponseDTO responseDto = new MessageResponseDTO("Successfully deleted game");
+        return new ResponseEntity<MessageResponseDTO>(responseDto, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/all")
     public ResponseEntity<MessageResponseDTO> games() {
         gameService.deleteAllGames();
 

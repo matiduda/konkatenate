@@ -10,9 +10,11 @@ import com.konkatenate.konkatenate.Login.LoginDto;
 import com.konkatenate.konkatenate.Registration.RegisterDto;
 import com.konkatenate.konkatenate.Registration.RegistrationResponseDto;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.catalina.connector.Response;
+import org.hibernate.sql.ast.tree.predicate.BooleanExpressionPredicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,10 +59,17 @@ public class AuthController {
                     HttpStatus.BAD_REQUEST);
         }
 
+        if (konkatenateUserRepository.existsByEmail(registerDto.getEmail())) {
+            return new ResponseEntity<>(new RegistrationResponseDto("User with this email already exists"),
+                    HttpStatus.BAD_REQUEST);
+        }
+
         KonkatenateUser user = new KonkatenateUser();
 
         user.setUsername(registerDto.getUsername());
+        user.setEmail(registerDto.getEmail());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+        user.setCreationDate(new Date());
 
         List<KonkatenateUserRole> roles = konkatenateUserRoleRepository.findByName("USER");
 
@@ -74,8 +83,27 @@ public class AuthController {
     @PostMapping("login")
     @ResponseBody
     public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDto loginDto) {
+        Boolean existsByUsername = konkatenateUserRepository.existsByUsername(loginDto.getUsernameOrEmail());
+        Boolean existsByEmail = konkatenateUserRepository.existsByEmail(loginDto.getUsernameOrEmail());
+
+        if (!existsByEmail && !existsByUsername) {
+            return new ResponseEntity<AuthResponseDTO>(
+                    new AuthResponseDTO(null,
+                            "Provided credentials are incorrect"),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        KonkatenateUser konkatenateUser = existsByEmail
+                ? konkatenateUserRepository.findByEmail(loginDto.getUsernameOrEmail())
+                : konkatenateUserRepository.findByUsername(loginDto.getUsernameOrEmail());
+
+        if (konkatenateUser == null) {
+            return new ResponseEntity<AuthResponseDTO>(
+                    new AuthResponseDTO(null, "Critical error"), HttpStatus.BAD_REQUEST);
+        }
+
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
+                new UsernamePasswordAuthenticationToken(konkatenateUser.getUsername(), loginDto.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 

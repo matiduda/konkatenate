@@ -13,6 +13,7 @@ import PlayPage from './pages/PlayPage';
 import UsersPage from './pages/UsersPage';
 import UserPage from './pages/UserPage';
 import { Box } from '@radix-ui/themes';
+import Footer from './components/Footer';
 
 export const API_URL = "http://localhost:8080/api";
 export const STATIC_URL = "http://localhost:8080/";
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="/user" element={<UserPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      <Footer />
     </div>
   );
 }

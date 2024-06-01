@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin
 public class ChatController {
 
-    @MessageMapping("/chat.sendMessage")
-    @SendTo("/topic/public")
+    @MessageMapping("/chat.sendMessage/{gameId}")
+    @SendTo("/topic/public/{gameId}")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
         return chatMessage;
     }
 
-    @MessageMapping("/chat.addUser")
-    @SendTo("/topic/public")
+    @MessageMapping("/chat.addUser/{gameId}")
+    @SendTo("/topic/public/{gameId}")
     public ChatMessage addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor)
             throws Exception {
         var sessionAttributes = headerAccessor.getSessionAttributes();

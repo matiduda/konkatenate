@@ -1,14 +1,13 @@
 import { Box, Button, Card, Container, Flex, Inset, Skeleton, Strong, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { API_URL, STATIC_URL } from "../App";
-import { render } from "react-dom";
-import { Description, Title } from "@radix-ui/react-toast";
 import { useNavigate } from "react-router-dom";
 
 export type GameInfo = {
     title: string,
     id: string,
     description: string,
+    uploaderUsername: string,
 }
 
 export const getImageCover = (gameId: string) => `${STATIC_URL}games/${gameId}/cover.jpg`;
@@ -39,7 +38,8 @@ export default function GamesPage() {
     const [gameList, setGameList] = useState<GameInfo[]>(new Array(5).map((el, i) => ({
         title: "Title",
         id: i.toString(),
-        description: "Description"
+        description: "Description",
+        uploader: "Uploader"
     }) as GameInfo));
 
     useEffect(() => {
@@ -74,7 +74,7 @@ export default function GamesPage() {
                             {info.description}
                         </Text>
                         <Flex justify="end">
-                            <Button onClick={() => navigate('/play', { state: { id: info.id, title: info.title } })}>Play</Button>
+                            <Button onClick={() => navigate('/play', { state: { id: info.id, title: info.title, uploader: info.uploader } })}>Play</Button>
                         </Flex>
                     </Card>
                 </Skeleton>

@@ -4,8 +4,8 @@ import * as Form from '@radix-ui/react-form';
 import { Button, Container } from '@radix-ui/themes';
 import { FormEvent, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { UsernameFormElement } from '../utils/types';
-import { API_URL, MAX_USERNAME_LENGTH, TOKEN_COOKIE_ID } from '../App';
+import { LoginFormElement } from '../utils/types';
+import { API_URL, TOKEN_COOKIE_ID } from '../App';
 import { ToastProvider, Toast, ToastTitle, ToastDescription, ToastViewport } from '@radix-ui/react-toast';
 import Cookies from 'universal-cookie';
 import { jwtDecode } from 'jwt-decode';
@@ -50,18 +50,18 @@ export default function LoginPage() {
         });
     };
 
-    const handleSubmit = (event: FormEvent<UsernameFormElement>) => {
+    const handleSubmit = (event: FormEvent<LoginFormElement>) => {
         event.preventDefault();
         setIsWaitingForRegisterResponse(true);
 
-        const username = event.currentTarget.elements.username.value;
+        const usernameOrEmail = event.currentTarget.elements.usernameOrEmail.value;
         const password = event.currentTarget.elements.password.value;
 
         const createUser = async () => {
             const loginEndpoint = API_URL + "/auth/login";
 
             const requestBody = {
-                username: username,
+                usernameOrEmail: usernameOrEmail,
                 password: password
             };
 
@@ -109,31 +109,25 @@ export default function LoginPage() {
     };
 
     return (
-        <Container>
+        <Container minHeight="70vh">
             <h1>Login</h1>
             <p>Don't have an account? You can <Link to="/register">create one here</Link></p>
             <Form.Root className="FormRoot" onSubmit={handleSubmit}>
 
-                <Form.Field className="FormField" name="username">
+                <Form.Field className="FormField" name="usernameOrEmail">
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: "10px" }}>
                         <Form.Label className="FormLabel">
-                            Username
+                            Username or email
                         </Form.Label>
                         <Form.Message className="FormMessage" match="valueMissing">
-                            Please enter your username
+                            Please enter username or email
                         </Form.Message>
                         <Form.Message className="FormMessage" match={username => !username.length}>
                             Username cannot be empty
                         </Form.Message>
-                        <Form.Message className="FormMessage" match="tooLong">
-                            Username cannot be longer than 10 characters
-                        </Form.Message>
-                        <Form.Message className="FormMessage" match="patternMismatch">
-                            Username must only contain alphanumeric characters or underscore
-                        </Form.Message>
                     </div>
                     <Form.Control asChild>
-                        <input className="Input" maxLength={20} pattern={`[A-Za-z0-9_]{0,${MAX_USERNAME_LENGTH}}`} required />
+                        <input className="Input" required />
                     </Form.Control>
                 </Form.Field>
                 <Form.Field className="FormField" name="password">

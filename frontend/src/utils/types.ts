@@ -1,12 +1,21 @@
-export interface LoginRegisterElements extends HTMLFormControlsCollection {
-    username: HTMLInputElement
+export interface LoginElements extends HTMLFormControlsCollection {
+    usernameOrEmail: HTMLInputElement
     password: HTMLInputElement
 }
 
-export interface LoginRegisterFormElement extends HTMLFormElement {
-    readonly elements: LoginRegisterElements
+export interface LoginFormElement extends HTMLFormElement {
+    readonly elements: LoginElements
 }
 
+export interface RegisterElements extends HTMLFormControlsCollection {
+    username: HTMLInputElement
+    email: HTMLInputElement
+    password: HTMLInputElement
+}
+
+export interface RegisterFormElement extends HTMLFormElement {
+    readonly elements: RegisterElements
+}
 
 export interface ChatFormElements extends HTMLFormControlsCollection {
     message: HTMLInputElement

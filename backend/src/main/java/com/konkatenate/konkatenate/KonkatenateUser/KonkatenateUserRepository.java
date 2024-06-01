@@ -8,7 +8,11 @@ public interface KonkatenateUserRepository extends JpaRepository<KonkatenateUser
 
     KonkatenateUser findByUsername(String username);
 
+    KonkatenateUser findByEmail(String username);
+
     List<KonkatenateUser> findAllByUsername(String username);
 
     Boolean existsByUsername(String username);
+
+    Boolean existsByEmail(String username);
 }

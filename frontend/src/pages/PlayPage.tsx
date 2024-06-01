@@ -1,10 +1,9 @@
 
 
-import { Box, Container, Flex } from "@radix-ui/themes";
+import { Container, Flex } from "@radix-ui/themes";
 import { useLocation } from "react-router-dom";
-import { SERVER_STOMP_URL, STATIC_URL } from "../App";
+import { STATIC_URL } from "../App";
 import Chat from "../components/Chat";
-import { StompProvider } from "../useStomp/Provider";
 
 export default function PlayPage() {
     const { state } = useLocation();
@@ -17,7 +16,7 @@ export default function PlayPage() {
             <h1>{title || "Unnamed game"}</h1>
             <Flex direction="row" gap="2" justify="between">
                 <iframe src={gameSrc(id)} title="description" className="GameIframe" frameBorder={0}></iframe>
-                <Chat />
+                <Chat gameID={id} />
             </Flex>
         </Container>
     )

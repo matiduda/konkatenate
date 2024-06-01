@@ -8,4 +8,5 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 
     List<Game> findByTitle(String title);
 
+    Game findByStorageId(String id);
 }

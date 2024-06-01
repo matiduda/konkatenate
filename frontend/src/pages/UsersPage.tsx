@@ -1,12 +1,17 @@
-import { Avatar, Box, Button, Card, Container, Flex, Skeleton, Strong, Text } from "@radix-ui/themes";
+import { Avatar, Box, Button, Card, Container, Flex, Strong, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { API_URL } from "../App";
 import { useNavigate } from "react-router-dom";
+import { GameInfo } from "./GamesPage";
+import spinner from "../assets/loading.svg";
 
 export type UserInfo = {
     id: number,
     username: string,
+    email: string,
+    created: number,
     roles: string[],
+    uploadedGames: GameInfo[],
 }
 
 export default function UsersPage() {
@@ -39,7 +44,10 @@ export default function UsersPage() {
         return json.users?.map((user, i) => ({
             id: i,
             username: user.username,
+            email: user.email,
+            created: user.creationDate,
             roles: user.roles,
+            uploadedGames: user.uploadedGames,
         }) as UserInfo);
     }
 
@@ -50,30 +58,54 @@ export default function UsersPage() {
         })
     }, []);
 
+    const renderDescription = () => {
+        return (
+            <Box>
+                <Card size="2">
+                    <Flex justify="between" align="center">
+                        <Box width="75px" />
+                        <Flex flexGrow="1" justify="between" maxWidth="44%">
+                            <Text as="span" size="3">
+                                <Strong>Username</Strong>
+                            </Text>
+                            <Text as="span" size="3">
+                                <Strong>Roles</Strong>
+                            </Text>
+                        </Flex>
+                        <Text as="span" size="3">
+                            <Strong>Uploaded</Strong>
+                        </Text>
+                        <Box width="50px" />
+                    </Flex>
+                </Card>
+            </Box>
+        )
+    }
+
     const renderGameCard = (info: UserInfo) => {
         return (
-            <Box key={info.id} width="500px">
-                <Skeleton loading={loading}>
-                    <Card size="2">
-
-                        <Flex justify="between" align="center">
-                            <Avatar
-                                size="3"
-                                radius="full"
-                                fallback={info.username[0]}
-                            />
-                            <Flex flexGrow="1" justify="between" maxWidth="50%">
-                                <Text as="span" size="3">
-                                    <Strong>{info.username}</Strong>
-                                </Text>
-                                <Text as="span" size="3">
-                                    {info.roles.join(', ')}
-                                </Text>
-                            </Flex>
-                            <Button onClick={() => navigate('/user', { state: { id: info.username } })}>Profile</Button>
+            <Box key={info.id} width="70vh">
+                <Card size="2">
+                    <Flex justify="between" align="center">
+                        <Avatar
+                            size="3"
+                            radius="full"
+                            fallback={info.username[0]}
+                        />
+                        <Flex flexGrow="1" justify="between" maxWidth="45%">
+                            <Text as="span" size="3">
+                                <Strong>{info.username}</Strong>
+                            </Text>
+                            <Text as="span" size="3">
+                                {info.roles.join(', ')}
+                            </Text>
                         </Flex>
-                    </Card>
-                </Skeleton>
+                        <Text as="span" size="3">
+                            <Strong>{info.uploadedGames.length}</Strong>
+                        </Text>
+                        <Button onClick={() => navigate('/user', { state: { username: info.username } })}>Profile</Button>
+                    </Flex>
+                </Card>
             </Box>
         )
     }
@@ -84,7 +116,13 @@ export default function UsersPage() {
             <Flex direction="row">
                 <Box flexGrow="1" />
                 <Flex direction="column">
-                    {userList.map(game => renderGameCard(game))}
+                    {renderDescription()}
+                    {loading ?
+                        (<>
+                            <Flex width="700px" height="500px" justify="center" align="center">
+                                <img src={spinner} width="50px" />
+                            </Flex>
+                        </>) : userList.map(game => renderGameCard(game))}
                 </Flex>
                 <Box flexGrow="1" />
             </Flex>

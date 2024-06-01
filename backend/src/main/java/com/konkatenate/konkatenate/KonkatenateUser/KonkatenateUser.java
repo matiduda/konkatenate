@@ -1,7 +1,10 @@
 package com.konkatenate.konkatenate.KonkatenateUser;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.konkatenate.konkatenate.Game.Game;
 import com.konkatenate.konkatenate.KonkatenateUserRole.KonkatenateUserRole;
@@ -38,6 +41,8 @@ public class KonkatenateUser {
     private Long id;
     private String username;
     private String password;
+    private String email;
+    private Date creationDate;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "users_roles", joinColumns = {
@@ -45,6 +50,6 @@ public class KonkatenateUser {
                     @JoinColumn(name = "role_id", referencedColumnName = "id") })
     private List<KonkatenateUserRole> roles = new ArrayList<>();
 
-    @OneToMany(mappedBy = "konkatenate_users")
-    public List<Game> uploadedGames = new ArrayList<>();
+    @OneToMany(mappedBy = "uploader")
+    public Set<Game> uploadedGames = new HashSet<Game>();
 }

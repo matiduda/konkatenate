@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { API_URL, MAX_USERNAME_LENGTH } from '../App';
 import { Toast, ToastAction, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from '@radix-ui/react-toast';
 import { useNavigate } from 'react-router-dom';
-import { UsernameFormElement } from '../utils/types';
+import { RegisterFormElement } from '../utils/types';
 
 export default function RegisterPage() {
 
@@ -21,19 +21,21 @@ export default function RegisterPage() {
         return () => clearTimeout(timerRef.current);
     }, []);
 
-    const handleSubmit = (event: FormEvent<UsernameFormElement>) => {
+    const handleSubmit = (event: FormEvent<RegisterFormElement>) => {
         event.preventDefault();
         setIsWaitingForRegisterResponse(true);
 
         const username = event.currentTarget.elements.username.value;
         const password = event.currentTarget.elements.password.value;
+        const email = event.currentTarget.elements.email.value;
 
         const createUser = async () => {
             const registerEndpoint = API_URL + "/auth/register";
 
             const requestBody = {
                 username: username,
-                password: password
+                password: password,
+                email: email,
             };
 
 
@@ -74,7 +76,7 @@ export default function RegisterPage() {
     const navigate = useNavigate();
 
     return (
-        <Container>
+        <Container minHeight="70vh">
             <h1>Create an account</h1>
             <Form.Root className="FormRoot" onSubmit={handleSubmit} style={{ width: "400px" }}>
                 <Form.Field className="FormField" name="username">
@@ -97,6 +99,22 @@ export default function RegisterPage() {
                     </div>
                     <Form.Control asChild>
                         <input className="Input" maxLength={MAX_USERNAME_LENGTH} pattern={`[A-Za-z0-9_]{0,${MAX_USERNAME_LENGTH}}`} required />
+                    </Form.Control>
+                </Form.Field>
+                <Form.Field className="FormField" name="email">
+                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: "10px" }}>
+                        <Form.Label className="FormLabel">
+                            Email
+                        </Form.Label>
+                        <Form.Message className="FormMessage" match="valueMissing">
+                            Please enter your email
+                        </Form.Message>
+                        <Form.Message className="FormMessage" match="patternMismatch">
+                            Please provide a valid email
+                        </Form.Message>
+                    </div>
+                    <Form.Control asChild>
+                        <input type="email" className="Input" required />
                     </Form.Control>
                 </Form.Field>
                 <Form.Field className="FormField" name="password">

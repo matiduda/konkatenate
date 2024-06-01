@@ -41,4 +41,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     public List<KonkatenateUser> getAllUsers() {
         return repository.findAll();
     }
+
+    public KonkatenateUser findByName(String username) {
+        return repository.findByUsername(username);
+    }
+
+    public boolean isAdmin(KonkatenateUser user) {
+        return user.getRoles().stream().filter(role -> role.getName().equals("ADMIN")).findFirst().isPresent();
+    }
 }

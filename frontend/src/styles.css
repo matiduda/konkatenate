@@ -16,7 +16,9 @@
 /* vars */
 
 :root {
-  --kkt-red: #ff4654;
+  --kkt-red: #FF4654;
+  --kkt-red-light: #FAAFAA;
+  --kkt-blue: #64B5DA;
 }
 
 /* reset */
@@ -384,4 +386,28 @@ button {
 
 .KktColorBkg {
   background-color: var(--kkt-red);
+}
+
+.FooterLink:focus {
+  color: "#909090";
+}
+
+.FooterLink {
+  color: "#909090";
+  text-decoration: none;
+}
+
+.FooterLink:link {
+  color: "#909090";
+  text-decoration: none;
+}
+
+.FooterLink:visited {
+  color: "#909090";
+  text-decoration: none;
+}
+
+.FooterLink:hover {
+  color: "#000000";
+  text-decoration: underline;
 }

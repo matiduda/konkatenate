@@ -34,6 +34,6 @@ public class Game {
     private String storageId;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "games", nullable = false, updatable = false)
-    private KonkatenateUser uploader;
+    @JoinColumn(name = "uploader_id", nullable = false, updatable = false)
+    public KonkatenateUser uploader;
 }
